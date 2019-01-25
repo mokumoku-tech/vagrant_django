@@ -70,6 +70,7 @@ Vagrant.configure("2") do |config|
     sudo yum -y install gcc wget curl-devel expat-devel gettext-devel zlib-devel perl-ExtUtils-MakeMaker autoconf
     sudo yum -y install bzip2 bzip2-devel libbz2-dev openssl openssl-devel readline readline-devel
     git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+    git clone https://github.com/pyenv/pyenv-update.git ~/.pyenv/plugins/pyenv-update
     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
     echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
     echo 'eval "$(pyenv init -)"' >> ~/.bash_profile
