@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 80, host: 8080
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.33.10"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -43,8 +43,8 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  Dir.mkdir('../app') unless Dir.exist?('../app')
-  config.vm.synced_folder "../app", "/vagrant_data"
+  Dir.mkdir('../data') unless Dir.exist?('../data')
+  config.vm.synced_folder "../data", "/vagrant_data"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -55,7 +55,7 @@ Vagrant.configure("2") do |config|
     # vb.gui = true
 
     # Customize the amount of memory on the VM:
-    vb.memory = "512"
+    vb.memory = "1024"
   end
   #
   # View the documentation for the provider you are using for more
@@ -64,11 +64,15 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
+
+  your_application_name = 'mokumoku'
+
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
     sudo yum update -y
-    sudo yum install -y git xz sqlite-devel libffi-devel
-    sudo yum -y install gcc wget curl-devel expat-devel gettext-devel zlib-devel perl-ExtUtils-MakeMaker autoconf
-    sudo yum -y install bzip2 bzip2-devel libbz2-dev openssl openssl-devel readline readline-devel
+    sudo yum install -y vim git xz sqlite-devel libffi-devel
+    sudo yum install -y gcc wget curl-devel expat-devel gettext-devel zlib-devel perl-ExtUtils-MakeMaker autoconf
+    sudo yum install -y bzip2 bzip2-devel libbz2-dev openssl openssl-devel readline readline-devel
+    sudo yum install -y postgresql-devel sqlite-devel
     git clone https://github.com/pyenv/pyenv.git ~/.pyenv
     git clone https://github.com/pyenv/pyenv-update.git ~/.pyenv/plugins/pyenv-update
     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
@@ -77,6 +81,16 @@ Vagrant.configure("2") do |config|
     source ~/.bash_profile
     pyenv install 3.7.2 && pyenv rehash && pyenv global 3.7.2
     python --version
+
+    pip install --upgrade pip
+    pip install Django
+
+    cd /vagrant_data
+    django-admin.py startproject #{your_application_name}
+    cd #{your_application_name}/
+    python manage.py migrate
+    python manage.py runserver 0.0.0.0:8000
+
     echo 'cd /vagrant_data' >> ~/.bash_profile
   SHELL
 end
